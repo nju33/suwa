@@ -371,7 +371,31 @@ export default {
       let postPageProc = null;
       if (pagerLoop && (pageIdx === 0 || pageIdx === pages.length - 1)) {
         const {pager, pagerLinks, pages: pagesEl} = this.refs;
-        const {style} = this.get();
+        const {style, active} = this.get();
+
+        // (() => {
+          // const _children = filterChildren(suwa.parentElement, 'suwa');
+          // _children.forEach((el, idx) => el.setAttribute('data-nth', idx));
+
+          // const sorted = Array.prototype.slice.call(this.refs.pages.children)
+          //   .sort((p1, p2) => {
+          //     const n1 = Number(p1.children[0].getAttribute('data-nth'));
+          //     const n2 = Number(p2.children[0].getAttribute('data-nth'));
+          //     return n1 - n2;
+          //   })
+          //   .map(p => p.children[0]);
+
+        //   const arr =
+        //     circulate(sorted, Number(active.getAttribute('data-nth')));
+        //   if (process.env.NODE_ENV === 'development') {
+        //     console.info('arr', arr.map(p => p.getAttribute('data-nth')));
+        //   }
+        //
+        //   arr.forEach((page, idx) => {
+        //     this.refs.pages.children[idx].appendChild(page);
+        //   });
+        // })();
+
         pagerLinks.style.width = pagerLinks.clientWidth + 'px';
         const removeingPageParent = pages[pageIdx].parentElement;
 
@@ -383,6 +407,19 @@ export default {
           cloned.style.zIndex = 10;
           cloned.style.display = ''
           postPageProc = () => {
+            // let baseEl = pagesEl.children[0];
+            // if (Number(baseEl.children[0].getAttribute('data-nth')) > pageIdx) {
+            //   let baseEl = pagesEl.children[0];
+            // }
+            // const baseEl = (() => {
+            //   const nths = Array.prototype.slice.call(pagesEl.children)
+            //     .sort(parent => {
+            //       return Number(parent.children[0].getAttribute('data-nth'));
+            //     });
+            //   let idx = 0;
+            //   for (const nth of nths) {
+            //   }
+            // });
             pagesEl.insertBefore(wrapper, pagesEl.children[0]);
             wrapper.nextElementSibling.appendChild(cloned);
             this.refs.pages.removeChild(removeingPageParent);
@@ -394,7 +431,9 @@ export default {
           cloned.style.zIndex = 10;
           cloned.style.display = ''
           postPageProc = () => {
-            pagesEl.appendChild(wrapper);
+            const idx = pages.indexOf(pages[pageIdx]);
+            pagesEl.insertBefore(wrapper, pagesEl.children[idx]);
+            // pagesEl.appendChild(wrapper);
             wrapper.previousElementSibling.appendChild(cloned);
             this.refs.pages.removeChild(removeingPageParent);
             cloned.parentElement.removeChild(cloned);
@@ -443,6 +482,22 @@ export default {
         if (postPageProc) {
           postPageProc();
         }
+
+        // if (oldPage && pagerLoop &&
+        //     (pageIdx === 0 || pageIdx === pages.length - 1)) {
+        //
+        //   const nth = Number(oldPage.getAttribute('data-nth'));
+        //   if (pageIdx === 0) {
+        //     const num = (() => {
+        //       if (current === 0) {
+        //         return pages.length - 1;
+        //       }
+        //       return nth - 1;
+        //     })();
+        //     if (oldPage.parentElement.previousElementSibling)
+        //   }
+        //   // if (Number(oldPage.getAttribute('data-nth')) - 1)
+        // }
 
         let offset = target.parentElement.offsetLeft;
         // WTF
