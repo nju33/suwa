@@ -55,7 +55,8 @@ window.addEventListener('load', () => {
         accentColor: '#cb1b45'
       },
 
-      progress: true, // Whether to display progressbar on top (default: false)
+      // Whether to display progressbar on top (default: false)
+      progress: true,
       // Whether or not to loop a page (default: false)
       pagerLoop: {
         // Whether it will go automatically to the next page when it is left // alone, how many milliseconds it will go to the next page
@@ -67,6 +68,10 @@ window.addEventListener('load', () => {
         prevPage: 37,
         nextPage: 39
       },
+
+      // Whether to move the page with the side-wheel (horizontal swipe on smart-device)
+      // (default: false)
+      wheel: true
 
       // Whether to display pager
       // defaults

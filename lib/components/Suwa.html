@@ -103,6 +103,7 @@
 <style scoped>
 .box {
   position: relative;
+  overflow: hidden;
 }
 
 .page-container {
@@ -201,6 +202,7 @@
 <script>
 import Hamster from 'hamsterjs';
 import throttle from 'lodash/throttle';
+import debounce from 'lodash/debounce';
 import raf from 'raf';
 import {
   wrapPage,
@@ -235,6 +237,8 @@ export default {
       //   nextPage: 39
       // },
 
+      wheel: false,
+
       pager: {
         inset: true
       },
@@ -245,7 +249,8 @@ export default {
       active: null,
 
       __autoScrollId: null,
-      __init: false
+      __init: false,
+      __touched: false
     };
   },
   computed: {
@@ -394,6 +399,24 @@ export default {
           this.changeNextPage();
         }
       })(this.get('keyMaps'));
+    },
+    handleTouchStart(ev) {
+      this.set({__touched: ev.touches[0].clientX});
+    },
+    handleTouchMove: throttle(function (ev) {
+      const pos = this.get('__touched');
+      if (!pos) {
+        return;
+      }
+
+      if (pos - ev.touches[0].clientX > window.innerWidth / 5) {
+        this.changeNextPage()
+      } else if (pos - ev.touches[0].clientX < -(window.innerWidth / 5)) {
+        this.changePrevPage()
+      }
+    }, 100),
+    handleTouchEnd() {
+      this.set({__touched: 0});
     }
   },
   oncreate() {
@@ -455,7 +478,14 @@ export default {
 
         const removeingPageParent = pages[pageIdx].parentElement;
         const wrapper = wrapPage(pages[pageIdx]);
-        Hamster(wrapper).wheel(handleWheel);
+        if (this.get('wheel')) {
+          Hamster(wrapper).wheel(handleWheel);
+          (t => {
+            wrapper.addEventListener('touchstart', t.handleTouchStart.bind(t));
+            wrapper.addEventListener('touchmove', t.handleTouchMove.bind(t));
+            wrapper.addEventListener('touchend', t.handleTouchEnd.bind(t));
+          })(this);
+        }
         if (pageIdx === 0) {
           const {nextPage} = this.get();
           const cloned = nextPage.cloneNode(true);
@@ -566,7 +596,14 @@ export default {
 
       children.forEach(el => {
         const wrapper = wrapPage(el)
-        Hamster(wrapper).wheel(handleWheel);
+        if (this.get('wheel')) {
+          Hamster(wrapper).wheel(handleWheel);
+          (t => {
+            wrapper.addEventListener('touchstart', t.handleTouchStart.bind(t));
+            wrapper.addEventListener('touchmove', t.handleTouchMove.bind(t));
+            wrapper.addEventListener('touchend', t.handleTouchEnd.bind(t));
+          })(this);
+        }
         pages.appendChild(wrapper);
       });
 
