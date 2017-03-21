@@ -10,11 +10,11 @@
       </div>
     </div>
 
-    {{#if progress && pages.length > 0 && !pagerLoop}}
+    {{#if progress && pages.length > 0}}
       <div class="suwa progress">
         <div class="suwa progress bar" style="
           background-color: {{style.accentColor}};
-          width: {{activeIdx / (pages.length - 1) * 100}}%;
+          width: {{activeNth / (pages.length - 1) * 100}}%;
         ">
         </div>
       </div>
@@ -224,7 +224,10 @@ export default {
       style: null,
 
       progress: true,
-      pagerLoop: true,
+      pagerLoop: {
+        autoScroll: true
+      },
+
       pagerInset: !true,
       pager: true,
       pages: [],
@@ -240,6 +243,12 @@ export default {
         return 0;
       }
       return pages.findIndex(p => p === active);
+    },
+    activeNth(active){
+      if (active === null) {
+        return 0;
+      }
+      return Number(active.getAttribute('data-nth'));
     },
     prevPage(pagerLoop, pages, active) {
       if (pages.length === 0 || active === null) {
