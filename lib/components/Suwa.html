@@ -225,7 +225,7 @@ export default {
 
       progress: true,
       pagerLoop: {
-        autoScroll: true
+        autoScroll: 3000,
       },
 
       pagerInset: !true,
@@ -234,7 +234,9 @@ export default {
 
       pagerUpdating: false,
       scroll: false,
-      active: null
+      active: null,
+
+      __autoScrollId: null
     };
   },
   computed: {
@@ -305,9 +307,21 @@ export default {
       }
     }, 600),
     changeNextPage: throttle(function () {
-      const {nextPage} = this.get();
+      const {nextPage, __autoScrollId, pagerLoop} = this.get();
+
+      if (__autoScrollId !== null) {
+        clearTimeout(__autoScrollId);
+        this.set({__autoScrollId: null});
+      }
+
       if (nextPage !== null) {
         this.set({active: nextPage});
+      }
+
+      if (pagerLoop.autoScroll > 0) {
+        this.set({__autoScrollId: setTimeout(() => {
+          this.changeNextPage();
+        }, pagerLoop.autoScroll)})
       }
     }, 600),
     mouseoverPager(ev) {
@@ -522,6 +536,10 @@ export default {
         this.set({active: children[0]});
 
       reset();
+
+      if (this.get('pagerLoop').autoScroll > 0) {
+        this.changeNextPage();
+      }
     });
   }
 };
