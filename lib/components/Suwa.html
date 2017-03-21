@@ -228,7 +228,7 @@ export default {
         autoScroll: 3000,
       },
 
-      pagerInset: !true,
+      pagerInset: true,
       pager: true,
       pages: [],
 
@@ -236,7 +236,8 @@ export default {
       scroll: false,
       active: null,
 
-      __autoScrollId: null
+      __autoScrollId: null,
+      __init: false
     };
   },
   computed: {
@@ -294,32 +295,66 @@ export default {
   methods: {
     changePage(page) {
       const {container} = this.refs;
-      const {active} = this.get();
+      const {__autoScrollId, pagerLoop, active} = this.get();
       if (active === null && page === active) {
         return;
       }
-      this.set({active: page});
-    },
-    changePrevPage: throttle(function () {
-      const {prevPage} = this.get();
-      if (prevPage !== null) {
-        this.set({active: prevPage});
-      }
-    }, 600),
-    changeNextPage: throttle(function () {
-      const {nextPage, __autoScrollId, pagerLoop} = this.get();
 
       if (__autoScrollId !== null) {
         clearTimeout(__autoScrollId);
         this.set({__autoScrollId: null});
       }
 
-      if (nextPage !== null) {
-        this.set({active: nextPage});
+      this.set({
+        active: page,
+        __init: true
+      });
+
+      if (this.get('__autoScrollId') === null && pagerLoop.autoScroll > 0) {
+        this.set({__autoScrollId: setTimeout(() => {
+          this.set({__autoScrollId: null});
+          this.changeNextPage();
+        }, pagerLoop.autoScroll)})
+      }
+    },
+    changePrevPage: throttle(function () {
+      const {__autoScrollId, pagerLoop, prevPage} = this.get();
+
+      if (prevPage !== null) {
+        if (__autoScrollId !== null) {
+          clearTimeout(__autoScrollId);
+          this.set({__autoScrollId: null});
+        }
+        this.set({
+          active: prevPage,
+          __init: true
+        });
       }
 
-      if (pagerLoop.autoScroll > 0) {
+      if (this.get('__autoScrollId') === null && pagerLoop.autoScroll > 0) {
         this.set({__autoScrollId: setTimeout(() => {
+          this.set({__autoScrollId: null});
+          this.changeNextPage();
+        }, pagerLoop.autoScroll)})
+      }
+    }, 600),
+    changeNextPage: throttle(function () {
+      const {nextPage, __autoScrollId, pagerLoop} = this.get();
+
+      if (nextPage !== null) {
+        if (__autoScrollId !== null) {
+          clearTimeout(__autoScrollId);
+          this.set({__autoScrollId: null});
+        }
+        this.set({
+          active: nextPage,
+          __init: true
+        });
+      }
+
+      if (this.get('__autoScrollId') === null && pagerLoop.autoScroll > 0) {
+        this.set({__autoScrollId: setTimeout(() => {
+          this.set({__autoScrollId: null});
           this.changeNextPage();
         }, pagerLoop.autoScroll)})
       }
@@ -437,7 +472,7 @@ export default {
         this.set({scroll: true});
 
         raf(() => {
-          const padding = calcOuterWidth(pagerLinks.children[1]) * 2 + 'px';
+          const padding = calcOuterWidth(pagerLinks.children[0]) * 2 + 'px';
           const paddingProp = pageIdx === 0 ? 'paddingLeft' : 'paddingRight'
           pagerLinks.style[paddingProp] = padding;
           pager.style.zIndex = 2;
@@ -448,6 +483,7 @@ export default {
               } else {
                 pages.push(pages.shift());
               }
+
               this.set({
                 pages,
                 scroll: false,
@@ -455,12 +491,15 @@ export default {
               });
 
               setTimeout(() => {
-                pagerLinks.style[paddingProp] = '0';
-                pager.style.zIndex = 9;
-                this.set({
-                  pagerUpdating: false
+                pagerLinks.style.transition = 'none';
+                raf(() => {
+                  pagerLinks.style[paddingProp] = '0';
+                  pager.style.zIndex = 9;
+                  this.set({
+                    pagerUpdating: false
+                  });
+                  reset();
                 });
-                reset();
               }, 100);
             });
           }, 400);
@@ -477,22 +516,6 @@ export default {
         if (postPageProc) {
           postPageProc();
         }
-
-        // if (oldPage && pagerLoop &&
-        //     (pageIdx === 0 || pageIdx === pages.length - 1)) {
-        //
-        //   const nth = Number(oldPage.getAttribute('data-nth'));
-        //   if (pageIdx === 0) {
-        //     const num = (() => {
-        //       if (current === 0) {
-        //         return pages.length - 1;
-        //       }
-        //       return nth - 1;
-        //     })();
-        //     if (oldPage.parentElement.previousElementSibling)
-        //   }
-        //   // if (Number(oldPage.getAttribute('data-nth')) - 1)
-        // }
 
         let offset = target.parentElement.offsetLeft;
         // WTF
@@ -538,7 +561,11 @@ export default {
       reset();
 
       if (this.get('pagerLoop').autoScroll > 0) {
-        this.changeNextPage();
+        setTimeout(() => {
+          if (!this.get('__init')) {
+            this.changeNextPage();
+          }
+        }, this.get('pagerLoop').autoScroll);
       }
     });
   }
