@@ -46,6 +46,24 @@ body {
 .page5 h1:before {
   background-image: url(https://source.unsplash.com/category/nature/1004x1004),linear-gradient(to right, #fff 100%, #fff 100%);
 }
+.page6 {
+  background-image: url(https://source.unsplash.com/category/nature/1005x1005);
+}
+.page6 h1:before {
+  background-image: url(https://source.unsplash.com/category/nature/1005x1005),linear-gradient(to right, #fff 100%, #fff 100%);
+}
+.page7 {
+  background-image: url(https://source.unsplash.com/category/nature/1006x1006);
+}
+.page7 h1:before {
+  background-image: url(https://source.unsplash.com/category/nature/1006x1006),linear-gradient(to right, #fff 100%, #fff 100%);
+}
+.page8 {
+  background-image: url(https://source.unsplash.com/category/nature/1007x1007);
+}
+.page8 h1:before {
+  background-image: url(https://source.unsplash.com/category/nature/1007x1007),linear-gradient(to right, #fff 100%, #fff 100%);
+}
 
 
 [class^=page] {
