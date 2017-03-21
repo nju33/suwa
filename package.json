@@ -1,6 +1,6 @@
 {
   "name": "suwa",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "📖 Like a carousel element",
   "main": "dist/suwa.umd.js",
   "jsnext:main": "dist/suwa.es.js",
