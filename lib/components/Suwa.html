@@ -228,6 +228,11 @@ export default {
         autoScroll: 3000,
       },
 
+      keyMaps: {
+        prevPage: 37,
+        nextPage: 39
+      },
+
       pagerInset: true,
       pager: true,
       pages: [],
@@ -337,7 +342,7 @@ export default {
           this.changeNextPage();
         }, pagerLoop.autoScroll)})
       }
-    }, 600),
+    }, 777),
     changeNextPage: throttle(function () {
       const {nextPage, __autoScrollId, pagerLoop} = this.get();
 
@@ -358,7 +363,7 @@ export default {
           this.changeNextPage();
         }, pagerLoop.autoScroll)})
       }
-    }, 600),
+    }, 777),
     mouseoverPager(ev) {
       const {style} = this.get();
       ev.currentTarget.style.background = style.accentColor;
@@ -377,6 +382,15 @@ export default {
     mouseleavePagerIcon(ev) {
       const icon = ev.currentTarget.querySelector('.icon');
       icon.style.fill = '';
+    },
+    handleKeyMap(ev) {
+      (keyMaps => {
+        if (ev.keyCode === keyMaps.prevPage) {
+          this.changePrevPage();
+        } else if (ev.keyCode === keyMaps.nextPage) {
+          this.changeNextPage();
+        }
+      })(this.get('keyMaps'));
     }
   },
   oncreate() {
@@ -568,6 +582,16 @@ export default {
         }, this.get('pagerLoop').autoScroll);
       }
     });
+
+    if (this.get('keyMaps')) {
+      document.body.addEventListener('keyup', this.handleKeyMap.bind(this))
+    }
+  },
+
+  ondestroy() {
+    if (this.get('keyMaps')) {
+      document.body.removeEventListener('keyup', this.handleKeyMap.bind(this))
+    }
   }
 };
 </script>
