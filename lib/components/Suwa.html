@@ -10,11 +10,11 @@
       </div>
     </div>
 
-    {{#if progress && pages.length > 0 && !pagerLoop}}
+    {{#if progress && pages.length > 0}}
       <div class="suwa progress">
         <div class="suwa progress bar" style="
           background-color: {{style.accentColor}};
-          width: {{activeIdx / (pages.length - 1) * 100}}%;
+          width: {{activeNth / (pages.length - 1) * 100}}%;
         ">
         </div>
       </div>
@@ -22,7 +22,7 @@
 
     {{#if pager && pages.length > 0}}
       <div ref:pager class="suwa pager" style="
-        bottom: {{pagerInset ? '1em' : '-2.3em'}};
+        bottom: {{pager.inset ? '1em' : '-2.3em'}};
       ">
         <a role="button" class="suwa pager-link prev" style="
           opacity: {{!pagerLoop && activeIdx === 0 ? 0 : 1}};
@@ -78,7 +78,7 @@
       </div>
 
       <div class="suwa pager" style="
-        bottom: {{pagerInset ? '1em' : '-2.3em'}};
+        bottom: {{pager.inset ? '1em' : '-2.3em'}};
         display: {{pagerUpdating ? '' : 'none'}};
       ">
         <div class="pager-links">
@@ -103,6 +103,7 @@
 <style scoped>
 .box {
   position: relative;
+  overflow: hidden;
 }
 
 .page-container {
@@ -201,6 +202,7 @@
 <script>
 import Hamster from 'hamsterjs';
 import throttle from 'lodash/throttle';
+import debounce from 'lodash/debounce';
 import raf from 'raf';
 import {
   wrapPage,
@@ -223,15 +225,32 @@ export default {
       },
       style: null,
 
-      progress: true,
-      pagerLoop: true,
-      pagerInset: !true,
-      pager: true,
+      progress: false,
+      pagerLoop: false,
+      // pagerLoop: {
+      //   autoScroll: 3000,
+      // },
+
+      keyMaps: false,
+      // keyMaps: {
+      //   prevPage: 37,
+      //   nextPage: 39
+      // },
+
+      wheel: false,
+
+      pager: {
+        inset: true
+      },
       pages: [],
 
       pagerUpdating: false,
       scroll: false,
-      active: null
+      active: null,
+
+      __autoScrollId: null,
+      __init: false,
+      __touched: false
     };
   },
   computed: {
@@ -240,6 +259,12 @@ export default {
         return 0;
       }
       return pages.findIndex(p => p === active);
+    },
+    activeNth(active){
+      if (active === null) {
+        return 0;
+      }
+      return Number(active.getAttribute('data-nth'));
     },
     prevPage(pagerLoop, pages, active) {
       if (pages.length === 0 || active === null) {
@@ -283,24 +308,70 @@ export default {
   methods: {
     changePage(page) {
       const {container} = this.refs;
-      const {active} = this.get();
+      const {__autoScrollId, pagerLoop, active} = this.get();
       if (active === null && page === active) {
         return;
       }
-      this.set({active: page});
+
+      if (__autoScrollId !== null) {
+        clearTimeout(__autoScrollId);
+        this.set({__autoScrollId: null});
+      }
+
+      this.set({
+        active: page,
+        __init: true
+      });
+
+      if (this.get('__autoScrollId') === null && pagerLoop.autoScroll > 0) {
+        this.set({__autoScrollId: setTimeout(() => {
+          this.set({__autoScrollId: null});
+          this.changeNextPage();
+        }, pagerLoop.autoScroll)})
+      }
     },
     changePrevPage: throttle(function () {
-      const {prevPage} = this.get();
+      const {__autoScrollId, pagerLoop, prevPage} = this.get();
+
       if (prevPage !== null) {
-        this.set({active: prevPage});
+        if (__autoScrollId !== null) {
+          clearTimeout(__autoScrollId);
+          this.set({__autoScrollId: null});
+        }
+        this.set({
+          active: prevPage,
+          __init: true
+        });
       }
-    }, 600),
+
+      if (this.get('__autoScrollId') === null && pagerLoop.autoScroll > 0) {
+        this.set({__autoScrollId: setTimeout(() => {
+          this.set({__autoScrollId: null});
+          this.changeNextPage();
+        }, pagerLoop.autoScroll)})
+      }
+    }, 777),
     changeNextPage: throttle(function () {
-      const {nextPage} = this.get();
+      const {nextPage, __autoScrollId, pagerLoop} = this.get();
+
       if (nextPage !== null) {
-        this.set({active: nextPage});
+        if (__autoScrollId !== null) {
+          clearTimeout(__autoScrollId);
+          this.set({__autoScrollId: null});
+        }
+        this.set({
+          active: nextPage,
+          __init: true
+        });
       }
-    }, 600),
+
+      if (this.get('__autoScrollId') === null && pagerLoop.autoScroll > 0) {
+        this.set({__autoScrollId: setTimeout(() => {
+          this.set({__autoScrollId: null});
+          this.changeNextPage();
+        }, pagerLoop.autoScroll)})
+      }
+    }, 777),
     mouseoverPager(ev) {
       const {style} = this.get();
       ev.currentTarget.style.background = style.accentColor;
@@ -319,6 +390,33 @@ export default {
     mouseleavePagerIcon(ev) {
       const icon = ev.currentTarget.querySelector('.icon');
       icon.style.fill = '';
+    },
+    handleKeyMap(ev) {
+      (keyMaps => {
+        if (ev.keyCode === keyMaps.prevPage) {
+          this.changePrevPage();
+        } else if (ev.keyCode === keyMaps.nextPage) {
+          this.changeNextPage();
+        }
+      })(this.get('keyMaps'));
+    },
+    handleTouchStart(ev) {
+      this.set({__touched: ev.touches[0].clientX});
+    },
+    handleTouchMove: throttle(function (ev) {
+      const pos = this.get('__touched');
+      if (!pos) {
+        return;
+      }
+
+      if (pos - ev.touches[0].clientX > window.innerWidth / 5) {
+        this.changeNextPage()
+      } else if (pos - ev.touches[0].clientX < -(window.innerWidth / 5)) {
+        this.changePrevPage()
+      }
+    }, 100),
+    handleTouchEnd() {
+      this.set({__touched: 0});
     }
   },
   oncreate() {
@@ -368,22 +466,37 @@ export default {
         console.info(pages.map(p => p.getAttribute('data-nth')));
       }
 
+      if (this.refs.pagerLinks) {
+        const {pagerLinks} = this.refs;
+        pagerLinks.style.width = pagerLinks.clientWidth + 'px';
+      }
+
       let postPageProc = null;
       if (pagerLoop && (pageIdx === 0 || pageIdx === pages.length - 1)) {
         const {pager, pagerLinks, pages: pagesEl} = this.refs;
-        const {style} = this.get();
-        pagerLinks.style.width = pagerLinks.clientWidth + 'px';
-        const removeingPageParent = pages[pageIdx].parentElement;
+        const {style, active} = this.get();
 
+        const removeingPageParent = pages[pageIdx].parentElement;
         const wrapper = wrapPage(pages[pageIdx]);
-        Hamster(wrapper).wheel(handleWheel);
+        if (this.get('wheel')) {
+          Hamster(wrapper).wheel(handleWheel);
+          (t => {
+            wrapper.addEventListener('touchstart', t.handleTouchStart.bind(t));
+            wrapper.addEventListener('touchmove', t.handleTouchMove.bind(t));
+            wrapper.addEventListener('touchend', t.handleTouchEnd.bind(t));
+          })(this);
+        }
         if (pageIdx === 0) {
           const {nextPage} = this.get();
           const cloned = nextPage.cloneNode(true);
           cloned.style.zIndex = 10;
           cloned.style.display = ''
           postPageProc = () => {
-            pagesEl.insertBefore(wrapper, pagesEl.children[0]);
+            pagesEl.insertBefore(
+              wrapper,
+              oldPage.parentElement.previousElementSibling ||
+                pagesEl.children[0]
+            );
             wrapper.nextElementSibling.appendChild(cloned);
             this.refs.pages.removeChild(removeingPageParent);
             cloned.parentElement.removeChild(cloned);
@@ -394,7 +507,10 @@ export default {
           cloned.style.zIndex = 10;
           cloned.style.display = ''
           postPageProc = () => {
-            pagesEl.appendChild(wrapper);
+            pagesEl.insertBefore(
+              wrapper,
+              oldPage.parentElement.nextElementSibling
+            );
             wrapper.previousElementSibling.appendChild(cloned);
             this.refs.pages.removeChild(removeingPageParent);
             cloned.parentElement.removeChild(cloned);
@@ -403,7 +519,7 @@ export default {
         this.set({scroll: true});
 
         raf(() => {
-          const padding = calcOuterWidth(pagerLinks.children[1]) * 2 + 'px';
+          const padding = calcOuterWidth(pagerLinks.children[0]) * 2 + 'px';
           const paddingProp = pageIdx === 0 ? 'paddingLeft' : 'paddingRight'
           pagerLinks.style[paddingProp] = padding;
           pager.style.zIndex = 2;
@@ -414,6 +530,7 @@ export default {
               } else {
                 pages.push(pages.shift());
               }
+
               this.set({
                 pages,
                 scroll: false,
@@ -421,12 +538,15 @@ export default {
               });
 
               setTimeout(() => {
-                pagerLinks.style[paddingProp] = '0';
-                pager.style.zIndex = 9;
-                this.set({
-                  pagerUpdating: false
+                pagerLinks.style.transition = 'none';
+                raf(() => {
+                  pagerLinks.style[paddingProp] = '0';
+                  pager.style.zIndex = 9;
+                  this.set({
+                    pagerUpdating: false
+                  });
+                  reset();
                 });
-                reset();
               }, 100);
             });
           }, 400);
@@ -476,7 +596,14 @@ export default {
 
       children.forEach(el => {
         const wrapper = wrapPage(el)
-        Hamster(wrapper).wheel(handleWheel);
+        if (this.get('wheel')) {
+          Hamster(wrapper).wheel(handleWheel);
+          (t => {
+            wrapper.addEventListener('touchstart', t.handleTouchStart.bind(t));
+            wrapper.addEventListener('touchmove', t.handleTouchMove.bind(t));
+            wrapper.addEventListener('touchend', t.handleTouchEnd.bind(t));
+          })(this);
+        }
         pages.appendChild(wrapper);
       });
 
@@ -486,7 +613,25 @@ export default {
         this.set({active: children[0]});
 
       reset();
+
+      if (this.get('pagerLoop').autoScroll > 0) {
+        setTimeout(() => {
+          if (!this.get('__init')) {
+            this.changeNextPage();
+          }
+        }, this.get('pagerLoop').autoScroll);
+      }
     });
+
+    if (this.get('keyMaps')) {
+      document.body.addEventListener('keyup', this.handleKeyMap.bind(this))
+    }
+  },
+
+  ondestroy() {
+    if (this.get('keyMaps')) {
+      document.body.removeEventListener('keyup', this.handleKeyMap.bind(this))
+    }
   }
 };
 </script>

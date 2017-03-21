@@ -7,33 +7,108 @@ body {
   font: 14px / 1.5 Quicksand, 游ゴシック体, "Yu Gothic", YuGothic, "ヒラギノ角ゴシック Pro", "Hiragino Kaku Gothic Pro", メイリオ, Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 }
 
-.container {
+[class^=page] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+}
+
+.page1 {
+  background-image: url(https://source.unsplash.com/category/nature/1000x1000);
+}
+.page1 h1:before {
+  background-image: url(https://source.unsplash.com/category/nature/1000x1000),linear-gradient(to right, #fff 100%, #fff 100%);
+}
+.page2{
+  background-image: url(https://source.unsplash.com/category/nature/1001x1001);
+}
+.page2 h1:before{
+  background-image: url(https://source.unsplash.com/category/nature/1001x1001),linear-gradient(to right, #fff 100%, #fff 100%);
+}
+.page3 {
+  background-image: url(https://source.unsplash.com/category/nature/1002x1002);
+}
+.page3 h1:before {
+  background-image: url(https://source.unsplash.com/category/nature/1002x1002),linear-gradient(to right, #fff 100%, #fff 100%);
+}
+.page4 {
+  background-image: url(https://source.unsplash.com/category/nature/1003x1003);
+}
+.page4 h1:before {
+  background-image: url(https://source.unsplash.com/category/nature/1003x1003),linear-gradient(to right, #fff 100%, #fff 100%);
+}
+.page5 {
+  background-image: url(https://source.unsplash.com/category/nature/1004x1004);
+}
+.page5 h1:before {
+  background-image: url(https://source.unsplash.com/category/nature/1004x1004),linear-gradient(to right, #fff 100%, #fff 100%);
+}
+.page6 {
+  background-image: url(https://source.unsplash.com/category/nature/1005x1005);
+}
+.page6 h1:before {
+  background-image: url(https://source.unsplash.com/category/nature/1005x1005),linear-gradient(to right, #fff 100%, #fff 100%);
+}
+.page7 {
+  background-image: url(https://source.unsplash.com/category/nature/1006x1006);
+}
+.page7 h1:before {
+  background-image: url(https://source.unsplash.com/category/nature/1006x1006),linear-gradient(to right, #fff 100%, #fff 100%);
+}
+.page8 {
+  background-image: url(https://source.unsplash.com/category/nature/1007x1007);
+}
+.page8 h1:before {
+  background-image: url(https://source.unsplash.com/category/nature/1007x1007),linear-gradient(to right, #fff 100%, #fff 100%);
+}
+
+
+[class^=page] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
 }
 
-.block {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-box-pack: center;
-  -ms-flex-pack: center;
-  justify-content: center;
+.page-wrapper h1 {
+  padding: 1em 3em;
+  overflow: hidden;
+  background: rgba(255,255,255,.5);
+  display: inline-block;
 }
-
-.block:first-child {
-  max-width: 10em;
-  margin-top: 8px;
-}
-
-.block:last-child {
-  width: 9em;
-  -ms-flex-pack: distribute;
-  justify-content: space-around;
-}
+/*
+.page-wrapper h1 span {
+  display: inline-block;
+  position: relative;
+  z-index: 9;
+}*/
+/*
+.page-wrapper h1:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-filter: blur(6px);
+  filter: blur(6px);
+  background-color: #fff;
+  opacity: .8;
+  /*background-size: cover;*/
+  /*padding: 10vh 30vw;
+  box-sizing: border-box;
+  background-clip: content-box;
+}*/

@@ -370,6 +370,7 @@ function isObject$2(value) {
 
 var isObject_1 = isObject$2;
 
+/** Detect free variable `global` from Node.js. */
 var freeGlobal$1 = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
 
 var _freeGlobal = freeGlobal$1;
@@ -1065,7 +1066,13 @@ function filterChildren(parent, ignoreClass) {
 }
 
 function circulate(els) {
-  var middleIdx = Math.floor(els.length / 2);
+  var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+  // const idx = els.findIndex(el => {
+  //   Number(el.getAttribute('data-nth')) === offset
+  // });
+  // const arr = els.concat(els).slice(els.findIndex(offset), els.length);
+  var middleIdx = Math.floor((els.length - 1) / 2);
   var heads = els.slice(0, middleIdx + 1);
   var tails = els.slice(middleIdx + 1, els.length);
   return tails.concat(heads);
@@ -1203,6 +1210,10 @@ function applyComputations ( state, newState, oldState, isInitial ) {
 		state.activeIdx = newState.activeIdx = template.computed.activeIdx( state.pages, state.active );
 	}
 	
+	if ( isInitial || ( 'active' in newState && typeof state.active === 'object' || state.active !== oldState.active ) ) {
+		state.activeNth = newState.activeNth = template.computed.activeNth( state.active );
+	}
+	
 	if ( isInitial || ( 'pagerLoop' in newState && typeof state.pagerLoop === 'object' || state.pagerLoop !== oldState.pagerLoop ) || ( 'pages' in newState && typeof state.pages === 'object' || state.pages !== oldState.pages ) || ( 'active' in newState && typeof state.active === 'object' || state.active !== oldState.active ) ) {
 		state.prevPage = newState.prevPage = template.computed.prevPage( state.pagerLoop, state.pages, state.active );
 	}
@@ -1225,15 +1236,32 @@ return {
       },
       style: null,
 
-      progress: true,
-      pagerLoop: true,
-      pagerInset: !true,
-      pager: true,
+      progress: false,
+      pagerLoop: false,
+      // pagerLoop: {
+      //   autoScroll: 3000,
+      // },
+
+      keyMaps: false,
+      // keyMaps: {
+      //   prevPage: 37,
+      //   nextPage: 39
+      // },
+
+      wheel: false,
+
+      pager: {
+        inset: true
+      },
       pages: [],
 
       pagerUpdating: false,
       scroll: false,
-      active: null
+      active: null,
+
+      __autoScrollId: null,
+      __init: false,
+      __touched: false
     };
   },
   computed: {
@@ -1242,6 +1270,12 @@ return {
         return 0;
       }
       return pages.findIndex(p => p === active);
+    },
+    activeNth(active){
+      if (active === null) {
+        return 0;
+      }
+      return Number(active.getAttribute('data-nth'));
     },
     prevPage(pagerLoop, pages, active) {
       if (pages.length === 0 || active === null) {
@@ -1285,24 +1319,70 @@ return {
   methods: {
     changePage(page) {
       const {container} = this.refs;
-      const {active} = this.get();
+      const {__autoScrollId, pagerLoop, active} = this.get();
       if (active === null && page === active) {
         return;
       }
-      this.set({active: page});
+
+      if (__autoScrollId !== null) {
+        clearTimeout(__autoScrollId);
+        this.set({__autoScrollId: null});
+      }
+
+      this.set({
+        active: page,
+        __init: true
+      });
+
+      if (this.get('__autoScrollId') === null && pagerLoop.autoScroll > 0) {
+        this.set({__autoScrollId: setTimeout(() => {
+          this.set({__autoScrollId: null});
+          this.changeNextPage();
+        }, pagerLoop.autoScroll)});
+      }
     },
     changePrevPage: throttle_1$1(function () {
-      const {prevPage} = this.get();
+      const {__autoScrollId, pagerLoop, prevPage} = this.get();
+
       if (prevPage !== null) {
-        this.set({active: prevPage});
+        if (__autoScrollId !== null) {
+          clearTimeout(__autoScrollId);
+          this.set({__autoScrollId: null});
+        }
+        this.set({
+          active: prevPage,
+          __init: true
+        });
       }
-    }, 600),
+
+      if (this.get('__autoScrollId') === null && pagerLoop.autoScroll > 0) {
+        this.set({__autoScrollId: setTimeout(() => {
+          this.set({__autoScrollId: null});
+          this.changeNextPage();
+        }, pagerLoop.autoScroll)});
+      }
+    }, 777),
     changeNextPage: throttle_1$1(function () {
-      const {nextPage} = this.get();
+      const {nextPage, __autoScrollId, pagerLoop} = this.get();
+
       if (nextPage !== null) {
-        this.set({active: nextPage});
+        if (__autoScrollId !== null) {
+          clearTimeout(__autoScrollId);
+          this.set({__autoScrollId: null});
+        }
+        this.set({
+          active: nextPage,
+          __init: true
+        });
       }
-    }, 600),
+
+      if (this.get('__autoScrollId') === null && pagerLoop.autoScroll > 0) {
+        this.set({__autoScrollId: setTimeout(() => {
+          this.set({__autoScrollId: null});
+          this.changeNextPage();
+        }, pagerLoop.autoScroll)});
+      }
+    }, 777),
     mouseoverPager(ev) {
       const {style} = this.get();
       ev.currentTarget.style.background = style.accentColor;
@@ -1321,6 +1401,33 @@ return {
     mouseleavePagerIcon(ev) {
       const icon = ev.currentTarget.querySelector('.icon');
       icon.style.fill = '';
+    },
+    handleKeyMap(ev) {
+      (keyMaps => {
+        if (ev.keyCode === keyMaps.prevPage) {
+          this.changePrevPage();
+        } else if (ev.keyCode === keyMaps.nextPage) {
+          this.changeNextPage();
+        }
+      })(this.get('keyMaps'));
+    },
+    handleTouchStart(ev) {
+      this.set({__touched: ev.touches[0].clientX});
+    },
+    handleTouchMove: throttle_1$1(function (ev) {
+      const pos = this.get('__touched');
+      if (!pos) {
+        return;
+      }
+
+      if (pos - ev.touches[0].clientX > window.innerWidth / 5) {
+        this.changeNextPage();
+      } else if (pos - ev.touches[0].clientX < -(window.innerWidth / 5)) {
+        this.changePrevPage();
+      }
+    }, 100),
+    handleTouchEnd() {
+      this.set({__touched: 0});
     }
   },
   oncreate() {
@@ -1365,27 +1472,37 @@ return {
       }
 
       const pageIdx = pages.findIndex(p => p === page);
-      {
-        console.info('pageIdx', pageIdx);
-        console.info(pages.map(p => p.getAttribute('data-nth')));
+      if (this.refs.pagerLinks) {
+        const {pagerLinks} = this.refs;
+        pagerLinks.style.width = pagerLinks.clientWidth + 'px';
       }
 
       let postPageProc = null;
       if (pagerLoop && (pageIdx === 0 || pageIdx === pages.length - 1)) {
         const {pager, pagerLinks, pages: pagesEl} = this.refs;
-        const {style} = this.get();
-        pagerLinks.style.width = pagerLinks.clientWidth + 'px';
-        const removeingPageParent = pages[pageIdx].parentElement;
+        const {style, active} = this.get();
 
+        const removeingPageParent = pages[pageIdx].parentElement;
         const wrapper = wrapPage(pages[pageIdx]);
-        hamster(wrapper).wheel(handleWheel);
+        if (this.get('wheel')) {
+          hamster(wrapper).wheel(handleWheel);
+          (t => {
+            wrapper.addEventListener('touchstart', t.handleTouchStart.bind(t));
+            wrapper.addEventListener('touchmove', t.handleTouchMove.bind(t));
+            wrapper.addEventListener('touchend', t.handleTouchEnd.bind(t));
+          })(this);
+        }
         if (pageIdx === 0) {
           const {nextPage} = this.get();
           const cloned = nextPage.cloneNode(true);
           cloned.style.zIndex = 10;
           cloned.style.display = '';
           postPageProc = () => {
-            pagesEl.insertBefore(wrapper, pagesEl.children[0]);
+            pagesEl.insertBefore(
+              wrapper,
+              oldPage.parentElement.previousElementSibling ||
+                pagesEl.children[0]
+            );
             wrapper.nextElementSibling.appendChild(cloned);
             this.refs.pages.removeChild(removeingPageParent);
             cloned.parentElement.removeChild(cloned);
@@ -1396,7 +1513,10 @@ return {
           cloned.style.zIndex = 10;
           cloned.style.display = '';
           postPageProc = () => {
-            pagesEl.appendChild(wrapper);
+            pagesEl.insertBefore(
+              wrapper,
+              oldPage.parentElement.nextElementSibling
+            );
             wrapper.previousElementSibling.appendChild(cloned);
             this.refs.pages.removeChild(removeingPageParent);
             cloned.parentElement.removeChild(cloned);
@@ -1405,7 +1525,7 @@ return {
         this.set({scroll: true});
 
         index(() => {
-          const padding = calcOuterWidth(pagerLinks.children[1]) * 2 + 'px';
+          const padding = calcOuterWidth(pagerLinks.children[0]) * 2 + 'px';
           const paddingProp = pageIdx === 0 ? 'paddingLeft' : 'paddingRight';
           pagerLinks.style[paddingProp] = padding;
           pager.style.zIndex = 2;
@@ -1416,6 +1536,7 @@ return {
               } else {
                 pages.push(pages.shift());
               }
+
               this.set({
                 pages,
                 scroll: false,
@@ -1423,12 +1544,15 @@ return {
               });
 
               setTimeout(() => {
-                pagerLinks.style[paddingProp] = '0';
-                pager.style.zIndex = 9;
-                this.set({
-                  pagerUpdating: false
+                pagerLinks.style.transition = 'none';
+                index(() => {
+                  pagerLinks.style[paddingProp] = '0';
+                  pager.style.zIndex = 9;
+                  this.set({
+                    pagerUpdating: false
+                  });
+                  reset();
                 });
-                reset();
               }, 100);
             });
           }, 400);
@@ -1478,7 +1602,14 @@ return {
 
       children.forEach(el => {
         const wrapper = wrapPage(el);
-        hamster(wrapper).wheel(handleWheel);
+        if (this.get('wheel')) {
+          hamster(wrapper).wheel(handleWheel);
+          (t => {
+            wrapper.addEventListener('touchstart', t.handleTouchStart.bind(t));
+            wrapper.addEventListener('touchmove', t.handleTouchMove.bind(t));
+            wrapper.addEventListener('touchend', t.handleTouchEnd.bind(t));
+          })(this);
+        }
         pages.appendChild(wrapper);
       });
 
@@ -1488,7 +1619,25 @@ return {
         this.set({active: children[0]});
 
       reset();
+
+      if (this.get('pagerLoop').autoScroll > 0) {
+        setTimeout(() => {
+          if (!this.get('__init')) {
+            this.changeNextPage();
+          }
+        }, this.get('pagerLoop').autoScroll);
+      }
     });
+
+    if (this.get('keyMaps')) {
+      document.body.addEventListener('keyup', this.handleKeyMap.bind(this));
+    }
+  },
+
+  ondestroy() {
+    if (this.get('keyMaps')) {
+      document.body.removeEventListener('keyup', this.handleKeyMap.bind(this));
+    }
   }
 };
 }());
@@ -1496,7 +1645,7 @@ return {
 let addedCss = false;
 function addCss () {
 	var style = createElement( 'style' );
-	style.textContent = "\n[svelte-1660470243].box, [svelte-1660470243] .box {\n  position: relative;\n}\n\n[svelte-1660470243].page-container, [svelte-1660470243] .page-container {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: calc(100% + 30px);\n  transition: .4s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n\n[svelte-1660470243].pages, [svelte-1660470243] .pages {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: calc(100% - 30px);\n  display: flex;\n}\n\n[svelte-1660470243].pages .page-wrapper, [svelte-1660470243] .pages .page-wrapper {\n  min-width: 100vw;\n  max-width: 100vw;\n  background-color: #fff;\n  box-sizing: border-box;\n  padding: 1em;\n  position: relative;\n  z-index: 1;\n}\n\n[svelte-1660470243].pages .page-wrapper > *, [svelte-1660470243] .pages .page-wrapper > * {\n  position: absolute;\n  z-index: 1;\n}\n\n[svelte-1660470243].progress, [svelte-1660470243] .progress {\n  position: absolute;\n  left: 0;\n  width: 100%;\n  height: 2px;\n  box-sizing: border-box;\n}\n\n[svelte-1660470243].progress.bar, [svelte-1660470243] .progress.bar {\n  transition: .4s cubic-bezier(0.55, 0.055, 0.675, 0.19);\n}\n\n[svelte-1660470243].pager, [svelte-1660470243] .pager {\n  position: absolute;\n  right: 50%;\n  transform: translateX(50%);\n  display: flex;\n  z-index: 1;\n}\n\n[svelte-1660470243].pager:first-of-type, [svelte-1660470243] .pager:first-of-type {\n  z-index: 2;\n}\n\n[svelte-1660470243].pager-links, [svelte-1660470243] .pager-links {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  position: relative;\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n  box-sizing: border-box;\n  overflow: hidden;\n}\n\n[svelte-1660470243].pager-link, [svelte-1660470243] .pager-link {\n  display: flex;\n  align-items: center;\n  position: relative;\n  width: .75em;\n  height: .75em;\n  min-width: .75em;\n  min-height: .75em;\n  margin: .5em;\n  cursor: pointer;\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n\n[svelte-1660470243].pager-link:not(.prev):not(.next), [svelte-1660470243] .pager-link:not(.prev):not(.next) {\n  background: #222;\n  border-radius: 50%;\n}\n\n[svelte-1660470243].pager-link svg, [svelte-1660470243] .pager-link svg {\n  display: block;\n  fill: #222;\n  width: .5em;\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n";
+	style.textContent = "\n[svelte-3806459839].box, [svelte-3806459839] .box {\n  position: relative;\n  overflow: hidden;\n}\n\n[svelte-3806459839].page-container, [svelte-3806459839] .page-container {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: calc(100% + 30px);\n  transition: .4s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n\n[svelte-3806459839].pages, [svelte-3806459839] .pages {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: calc(100% - 30px);\n  display: flex;\n}\n\n[svelte-3806459839].pages .page-wrapper, [svelte-3806459839] .pages .page-wrapper {\n  min-width: 100vw;\n  max-width: 100vw;\n  background-color: #fff;\n  box-sizing: border-box;\n  padding: 1em;\n  position: relative;\n  z-index: 1;\n}\n\n[svelte-3806459839].pages .page-wrapper > *, [svelte-3806459839] .pages .page-wrapper > * {\n  position: absolute;\n  z-index: 1;\n}\n\n[svelte-3806459839].progress, [svelte-3806459839] .progress {\n  position: absolute;\n  left: 0;\n  width: 100%;\n  height: 2px;\n  box-sizing: border-box;\n}\n\n[svelte-3806459839].progress.bar, [svelte-3806459839] .progress.bar {\n  transition: .4s cubic-bezier(0.55, 0.055, 0.675, 0.19);\n}\n\n[svelte-3806459839].pager, [svelte-3806459839] .pager {\n  position: absolute;\n  right: 50%;\n  transform: translateX(50%);\n  display: flex;\n  z-index: 1;\n}\n\n[svelte-3806459839].pager:first-of-type, [svelte-3806459839] .pager:first-of-type {\n  z-index: 2;\n}\n\n[svelte-3806459839].pager-links, [svelte-3806459839] .pager-links {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  position: relative;\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n  box-sizing: border-box;\n  overflow: hidden;\n}\n\n[svelte-3806459839].pager-link, [svelte-3806459839] .pager-link {\n  display: flex;\n  align-items: center;\n  position: relative;\n  width: .75em;\n  height: .75em;\n  min-width: .75em;\n  min-height: .75em;\n  margin: .5em;\n  cursor: pointer;\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n\n[svelte-3806459839].pager-link:not(.prev):not(.next), [svelte-3806459839] .pager-link:not(.prev):not(.next) {\n  background: #222;\n  border-radius: 50%;\n}\n\n[svelte-3806459839].pager-link svg, [svelte-3806459839] .pager-link svg {\n  display: block;\n  fill: #222;\n  width: .5em;\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n";
 	appendNode( style, document.head );
 
 	addedCss = true;
@@ -1545,20 +1694,20 @@ function renderMainFragment ( root, component ) {
 
 function renderIfBlock_0 ( root, component ) {
 	var div = createElement( 'div' );
-	setAttribute( div, 'svelte-1660470243', '' );
+	setAttribute( div, 'svelte-3806459839', '' );
 	component.refs.suwa = div;
 	div.className = "suwa box";
 	div.style.cssText = "\n    width: " + ( root.style.width ) + ";\n    height: " + ( root.style.height ) + ";\n  ";
 	
 	var div1 = createElement( 'div' );
-	setAttribute( div1, 'svelte-1660470243', '' );
+	setAttribute( div1, 'svelte-3806459839', '' );
 	component.refs.container = div1;
 	div1.className = "suwa page-container";
 	
 	appendNode( div1, div );
 	
 	var div2 = createElement( 'div' );
-	setAttribute( div2, 'svelte-1660470243', '' );
+	setAttribute( div2, 'svelte-3806459839', '' );
 	component.refs.pages = div2;
 	div2.className = "suwa pages";
 	div2.style.cssText = "\n        background-color: " + ( root.style.baseColor ) + ";\n      ";
@@ -1569,7 +1718,7 @@ function renderIfBlock_0 ( root, component ) {
 	appendNode( ifBlock1_anchor, div );
 	
 	function getBlock1 ( root ) {
-		if ( root.progress && root.pages.length > 0 && !root.pagerLoop ) return renderIfBlock1_0;
+		if ( root.progress && root.pages.length > 0 ) return renderIfBlock1_0;
 		return null;
 	}
 	
@@ -1640,13 +1789,13 @@ function renderIfBlock_0 ( root, component ) {
 
 function renderIfBlock2_0 ( root, component ) {
 	var div = createElement( 'div' );
-	setAttribute( div, 'svelte-1660470243', '' );
+	setAttribute( div, 'svelte-3806459839', '' );
 	component.refs.pager = div;
 	div.className = "suwa pager";
-	div.style.cssText = "\n        bottom: " + ( root.pagerInset ? '1em' : '-2.3em' ) + ";\n      ";
+	div.style.cssText = "\n        bottom: " + ( root.pager.inset ? '1em' : '-2.3em' ) + ";\n      ";
 	
 	var a = createElement( 'a' );
-	setAttribute( a, 'svelte-1660470243', '' );
+	setAttribute( a, 'svelte-3806459839', '' );
 	setAttribute( a, 'role', "button" );
 	a.className = "suwa pager-link prev";
 	a.style.cssText = "\n          opacity: " + ( !root.pagerLoop && root.activeIdx === 0 ? 0 : 1 ) + ";\n          cursor: " + ( !root.pagerLoop && root.activeIdx === 0 ? 'default' : '' ) + ";\n        ";
@@ -1673,7 +1822,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( createText( "\n          " ), a );
 	
 	var svg = createSvgElement( 'svg' );
-	setAttribute( svg, 'svelte-1660470243', '' );
+	setAttribute( svg, 'svelte-3806459839', '' );
 	setAttribute( svg, 'version', "1.1" );
 	setAttribute( svg, 'viewBox', "0 0 8 16" );
 	setAttribute( svg, 'class', "suwa pager icon" );
@@ -1682,7 +1831,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( svg, a );
 	
 	var path = createSvgElement( 'path' );
-	setAttribute( path, 'svelte-1660470243', '' );
+	setAttribute( path, 'svelte-3806459839', '' );
 	setAttribute( path, 'fill-rule', "evenodd" );
 	setAttribute( path, 'd', "M5.5 3L7 4.5 3.25 8 7 11.5 5.5 13l-5-5z" );
 	
@@ -1690,14 +1839,14 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( createText( "\n        " ), div );
 	
 	var div1 = createElement( 'div' );
-	setAttribute( div1, 'svelte-1660470243', '' );
+	setAttribute( div1, 'svelte-3806459839', '' );
 	component.refs.pagerLinks = div1;
 	div1.className = "pager-links";
 	
 	appendNode( div1, div );
 	
 	var a1 = createElement( 'a' );
-	setAttribute( a1, 'svelte-1660470243', '' );
+	setAttribute( a1, 'svelte-3806459839', '' );
 	setAttribute( a1, 'role', "button" );
 	a1.className = "\n            pager-link\n          ";
 	a1.style.cssText = "\n            background-color: " + ( root.prevPage === root.active ? root.style.accentColor : root.style.subColor ) + ";\n            display: " + ( root.scroll ? 'block' : 'none' ) + ";\n          ";
@@ -1743,7 +1892,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( createText( "\n          " ), div1 );
 	
 	var a2 = createElement( 'a' );
-	setAttribute( a2, 'svelte-1660470243', '' );
+	setAttribute( a2, 'svelte-3806459839', '' );
 	setAttribute( a2, 'role', "button" );
 	a2.className = "\n            pager-link\n          ";
 	a2.style.cssText = "\n            background-color: " + ( root.nextPage === root.active ? root.style.accentColor : root.style.subColor ) + ";\n            display: " + ( root.scroll ? 'block' : 'none' ) + ";\n          ";
@@ -1778,7 +1927,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( createText( "\n        " ), div );
 	
 	var a3 = createElement( 'a' );
-	setAttribute( a3, 'svelte-1660470243', '' );
+	setAttribute( a3, 'svelte-3806459839', '' );
 	setAttribute( a3, 'role', "button" );
 	a3.className = "suwa pager-link next";
 	a3.style.cssText = "\n          opacity: " + ( !root.pagerLoop && root.activeIdx === root.pages.length - 1 ? 0 : 1 ) + ";\n          cursor: " + ( !root.pagerLoop && root.activeIdx === root.pages.length - 1 ? 'default' : '' ) + ";\n        ";
@@ -1804,7 +1953,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( a3, div );
 	
 	var svg1 = createSvgElement( 'svg' );
-	setAttribute( svg1, 'svelte-1660470243', '' );
+	setAttribute( svg1, 'svelte-3806459839', '' );
 	setAttribute( svg1, 'version', "1.1" );
 	setAttribute( svg1, 'viewBox', "0 0 8 16" );
 	setAttribute( svg1, 'class', "suwa pager icon" );
@@ -1813,7 +1962,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( svg1, a3 );
 	
 	var path1 = createSvgElement( 'path' );
-	setAttribute( path1, 'svelte-1660470243', '' );
+	setAttribute( path1, 'svelte-3806459839', '' );
 	setAttribute( path1, 'fill-rule', "evenodd" );
 	setAttribute( path1, 'd', "M7.5 8l-5 5L1 11.5 4.75 8 1 4.5 2.5 3z" );
 	
@@ -1821,12 +1970,12 @@ function renderIfBlock2_0 ( root, component ) {
 	var text5 = createText( "\n\n      " );
 	
 	var div2 = createElement( 'div' );
-	setAttribute( div2, 'svelte-1660470243', '' );
+	setAttribute( div2, 'svelte-3806459839', '' );
 	div2.className = "suwa pager";
-	div2.style.cssText = "\n        bottom: " + ( root.pagerInset ? '1em' : '-2.3em' ) + ";\n        display: " + ( root.pagerUpdating ? '' : 'none' ) + ";\n      ";
+	div2.style.cssText = "\n        bottom: " + ( root.pager.inset ? '1em' : '-2.3em' ) + ";\n        display: " + ( root.pagerUpdating ? '' : 'none' ) + ";\n      ";
 	
 	var div3 = createElement( 'div' );
-	setAttribute( div3, 'svelte-1660470243', '' );
+	setAttribute( div3, 'svelte-3806459839', '' );
 	div3.className = "pager-links";
 	
 	appendNode( div3, div2 );
@@ -1850,7 +1999,7 @@ function renderIfBlock2_0 ( root, component ) {
 		update: function ( changed, root ) {
 			var __tmp;
 		
-			div.style.cssText = "\n        bottom: " + ( root.pagerInset ? '1em' : '-2.3em' ) + ";\n      ";
+			div.style.cssText = "\n        bottom: " + ( root.pager.inset ? '1em' : '-2.3em' ) + ";\n      ";
 			
 			a.style.cssText = "\n          opacity: " + ( !root.pagerLoop && root.activeIdx === 0 ? 0 : 1 ) + ";\n          cursor: " + ( !root.pagerLoop && root.activeIdx === 0 ? 'default' : '' ) + ";\n        ";
 			
@@ -1879,7 +2028,7 @@ function renderIfBlock2_0 ( root, component ) {
 			
 			a3.style.cssText = "\n          opacity: " + ( !root.pagerLoop && root.activeIdx === root.pages.length - 1 ? 0 : 1 ) + ";\n          cursor: " + ( !root.pagerLoop && root.activeIdx === root.pages.length - 1 ? 'default' : '' ) + ";\n        ";
 			
-			div2.style.cssText = "\n        bottom: " + ( root.pagerInset ? '1em' : '-2.3em' ) + ";\n        display: " + ( root.pagerUpdating ? '' : 'none' ) + ";\n      ";
+			div2.style.cssText = "\n        bottom: " + ( root.pager.inset ? '1em' : '-2.3em' ) + ";\n        display: " + ( root.pagerUpdating ? '' : 'none' ) + ";\n      ";
 			
 			var eachBlock1_value = root.pages;
 			
@@ -1929,7 +2078,7 @@ function renderIfBlock2_0 ( root, component ) {
 
 function renderEachBlock1 ( root, eachBlock1_value, page, x, component ) {
 	var a = createElement( 'a' );
-	setAttribute( a, 'svelte-1660470243', '' );
+	setAttribute( a, 'svelte-3806459839', '' );
 	setAttribute( a, 'role', "button" );
 	a.className = "\n              pager-link button\n            ";
 	a.style.cssText = "\n              background-color: " + ( (!root.scroll && root.active === page) || (root.scroll && root.active === page) ? root.style.accentColor : root.style.subColor ) + ";\n              transition: none;\n            ";
@@ -1989,7 +2138,7 @@ function renderEachBlock1 ( root, eachBlock1_value, page, x, component ) {
 
 function renderEachBlock ( root, eachBlock_value, page, x, component ) {
 	var a = createElement( 'a' );
-	setAttribute( a, 'svelte-1660470243', '' );
+	setAttribute( a, 'svelte-3806459839', '' );
 	setAttribute( a, 'role', "button" );
 	a.className = "\n              pager-link button\n            ";
 	a.style.cssText = "\n              background-color: " + ( (!root.scroll && root.active === page) || (root.scroll && root.active === page) ? root.style.accentColor : root.style.subColor ) + ";\n              transition: " + ( root.active === page ? 'none' : '' ) + ";\n            ";
@@ -2049,13 +2198,13 @@ function renderEachBlock ( root, eachBlock_value, page, x, component ) {
 
 function renderIfBlock1_0 ( root, component ) {
 	var div = createElement( 'div' );
-	setAttribute( div, 'svelte-1660470243', '' );
+	setAttribute( div, 'svelte-3806459839', '' );
 	div.className = "suwa progress";
 	
 	var div1 = createElement( 'div' );
-	setAttribute( div1, 'svelte-1660470243', '' );
+	setAttribute( div1, 'svelte-3806459839', '' );
 	div1.className = "suwa progress bar";
-	div1.style.cssText = "\n          background-color: " + ( root.style.accentColor ) + ";\n          width: " + ( root.activeIdx / (root.pages.length - 1) * 100 ) + "%;\n        ";
+	div1.style.cssText = "\n          background-color: " + ( root.style.accentColor ) + ";\n          width: " + ( root.activeNth / (root.pages.length - 1) * 100 ) + "%;\n        ";
 	
 	appendNode( div1, div );
 
@@ -2067,7 +2216,7 @@ function renderIfBlock1_0 ( root, component ) {
 		update: function ( changed, root ) {
 			var __tmp;
 		
-			div1.style.cssText = "\n          background-color: " + ( root.style.accentColor ) + ";\n          width: " + ( root.activeIdx / (root.pages.length - 1) * 100 ) + "%;\n        ";
+			div1.style.cssText = "\n          background-color: " + ( root.style.accentColor ) + ";\n          width: " + ( root.activeNth / (root.pages.length - 1) * 100 ) + "%;\n        ";
 		},
 		
 		teardown: function ( detach ) {
@@ -2128,6 +2277,7 @@ Suwa$1.prototype._set = function _set ( newState ) {
 
 Suwa$1.prototype.teardown = Suwa$1.prototype.destroy = function destroy ( detach ) {
 	this.fire( 'teardown' );
+template.ondestroy.call( this );
 
 	this._fragment.teardown( detach !== false );
 	this._fragment = null;
