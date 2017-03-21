@@ -4,6 +4,8 @@
 
 [![Build Status](https://travis-ci.org/nju33/suwa.svg?branch=master)](https://travis-ci.org/nju33/suwa) -->
 
+📖 Like a carousel element
+
 
 ![screenshot](https://github.com/nju33/suwa/raw/master/images/screenshot.gif?raw=true)
 

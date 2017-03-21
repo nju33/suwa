@@ -1,7 +1,7 @@
 {
   "name": "suwa",
-  "version": "0.0.1",
-  "description": "💊 Elements like input[type=range]",
+  "version": "0.0.0",
+  "description": "📖 Like a carousel element",
   "main": "dist/suwa.umd.js",
   "jsnext:main": "dist/suwa.es.js",
   "scripts": {
@@ -18,8 +18,7 @@
     "browser",
     "commonjs",
     "es",
-    "range",
-    "input"
+    "carousel"
   ],
   "author": "nju33",
   "license": "MIT",
