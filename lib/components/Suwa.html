@@ -22,7 +22,7 @@
 
     {{#if pager && pages.length > 0}}
       <div ref:pager class="suwa pager" style="
-        bottom: {{pagerInset ? '1em' : '-2.3em'}};
+        bottom: {{pager.inset ? '1em' : '-2.3em'}};
       ">
         <a role="button" class="suwa pager-link prev" style="
           opacity: {{!pagerLoop && activeIdx === 0 ? 0 : 1}};
@@ -78,7 +78,7 @@
       </div>
 
       <div class="suwa pager" style="
-        bottom: {{pagerInset ? '1em' : '-2.3em'}};
+        bottom: {{pager.inset ? '1em' : '-2.3em'}};
         display: {{pagerUpdating ? '' : 'none'}};
       ">
         <div class="pager-links">
@@ -223,18 +223,21 @@ export default {
       },
       style: null,
 
-      progress: true,
-      pagerLoop: {
-        autoScroll: 3000,
-      },
+      progress: false,
+      pagerLoop: false,
+      // pagerLoop: {
+      //   autoScroll: 3000,
+      // },
 
-      keyMaps: {
-        prevPage: 37,
-        nextPage: 39
-      },
+      keyMaps: false,
+      // keyMaps: {
+      //   prevPage: 37,
+      //   nextPage: 39
+      // },
 
-      pagerInset: true,
-      pager: true,
+      pager: {
+        inset: true
+      },
       pages: [],
 
       pagerUpdating: false,
