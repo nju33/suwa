@@ -59,6 +59,7 @@ window.addEventListener('load', () => {
 
       // Whether to display progressbar on top (default: false)
       progress: true,
+      
       // Whether or not to loop a page (default: false)
       pagerLoop: {
         // Whether it will go automatically to the next page when it is left // alone, how many milliseconds it will go to the next page
@@ -66,6 +67,7 @@ window.addEventListener('load', () => {
       },
 
       // To operate with the keyboard Set
+      // default: false
       keyMaps: {
         prevPage: 37,
         nextPage: 39
