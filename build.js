@@ -53,7 +53,8 @@ function bundle() {
             const opts = {
               moduleName: MODULE_NAME,
               globals,
-              format
+              format,
+              banner: rollupConfig.banner
             };
             const destPath = './dist/suwa.js';
             try {

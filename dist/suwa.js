@@ -1,3 +1,8 @@
+/*!
+ * Copyright 2017, nju33
+ * Released under the MIT License
+ * https://github.com/nju33/suwa
+ */
 var Suwa = (function () {
 'use strict';
 
