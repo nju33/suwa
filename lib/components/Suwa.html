@@ -49,6 +49,7 @@
               pager-link button
             " style="
               background-color: {{(!scroll && active === page) || (scroll && active === page) ? style.accentColor : style.subColor}};
+              -webkit-transition: {{active === page ? 'none' : ''}};
               transition: {{active === page ? 'none' : ''}};
             " on:click="changePage(page)"
               on:mouseover="mouseoverPager(event)"
@@ -87,6 +88,7 @@
               pager-link button
             " style="
               background-color: {{(!scroll && active === page) || (scroll && active === page) ? style.accentColor : style.subColor}};
+              -webkit-transition: none;
               transition: none;
             " on:click="changePage(page)"
               on:mouseover="mouseoverPager(event)"
@@ -112,6 +114,7 @@
   top: 0;
   width: 100%;
   height: calc(100% + 30px);
+  -webkit-transition: .4s cubic-bezier(0.645, 0.045, 0.355, 1);
   transition: .4s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
@@ -121,6 +124,8 @@
   top: 0;
   width: 100%;
   height: calc(100% - 30px);
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
 }
 
@@ -148,13 +153,17 @@
 }
 
 .progress.bar {
+  -webkit-transition: .4s cubic-bezier(0.55, 0.055, 0.675, 0.19);
   transition: .4s cubic-bezier(0.55, 0.055, 0.675, 0.19);
 }
 
 .pager {
   position: absolute;
   right: 50%;
-  transform: translateX(50%);
+  -webkit-transform: translateX(50%);
+          transform: translateX(50%);
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
   z-index: 1;
 }
@@ -164,18 +173,29 @@
 }
 
 .pager-links {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
   position: relative;
+  -webkit-transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);
   transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);
   box-sizing: border-box;
   overflow: hidden;
 }
 
 .pager-link {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
   position: relative;
   width: .75em;
   height: .75em;
@@ -183,6 +203,7 @@
   min-height: .75em;
   margin: .5em;
   cursor: pointer;
+  -webkit-transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);
   transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
@@ -195,6 +216,7 @@
   display: block;
   fill: #222;
   width: .5em;
+  -webkit-transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);
   transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 </style>

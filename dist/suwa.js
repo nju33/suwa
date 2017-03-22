@@ -1645,7 +1645,7 @@ return {
 let addedCss = false;
 function addCss () {
 	var style = createElement( 'style' );
-	style.textContent = "\n[svelte-2783279863].box, [svelte-2783279863] .box {\n  position: relative;\n  overflow: hidden;\n}\n\n[svelte-2783279863].page-container, [svelte-2783279863] .page-container {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: calc(100% + 30px);\n  transition: .4s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n\n[svelte-2783279863].pages, [svelte-2783279863] .pages {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: calc(100% - 30px);\n  display: flex;\n}\n\n[svelte-2783279863].pages .page-wrapper, [svelte-2783279863] .pages .page-wrapper {\n  min-width: 100vw;\n  max-width: 100vw;\n  background-color: #fff;\n  box-sizing: border-box;\n  padding: 1em;\n  position: relative;\n  z-index: 1;\n}\n\n[svelte-2783279863].pages .page-wrapper > *, [svelte-2783279863] .pages .page-wrapper > * {\n  position: absolute;\n  z-index: 1;\n}\n\n[svelte-2783279863].progress, [svelte-2783279863] .progress {\n  position: absolute;\n  left: 0;\n  width: 100%;\n  height: 2px;\n  box-sizing: border-box;\n}\n\n[svelte-2783279863].progress.bar, [svelte-2783279863] .progress.bar {\n  transition: .4s cubic-bezier(0.55, 0.055, 0.675, 0.19);\n}\n\n[svelte-2783279863].pager, [svelte-2783279863] .pager {\n  position: absolute;\n  right: 50%;\n  transform: translateX(50%);\n  display: flex;\n  z-index: 1;\n}\n\n[svelte-2783279863].pager:first-of-type, [svelte-2783279863] .pager:first-of-type {\n  z-index: 2;\n}\n\n[svelte-2783279863].pager-links, [svelte-2783279863] .pager-links {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  position: relative;\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n  box-sizing: border-box;\n  overflow: hidden;\n}\n\n[svelte-2783279863].pager-link, [svelte-2783279863] .pager-link {\n  display: flex;\n  align-items: center;\n  position: relative;\n  width: .75em;\n  height: .75em;\n  min-width: .75em;\n  min-height: .75em;\n  margin: .5em;\n  cursor: pointer;\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n\n[svelte-2783279863].pager-link:not(.prev):not(.next), [svelte-2783279863] .pager-link:not(.prev):not(.next) {\n  background: #222;\n  border-radius: 50%;\n}\n\n[svelte-2783279863].pager-link svg, [svelte-2783279863] .pager-link svg {\n  display: block;\n  fill: #222;\n  width: .5em;\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n";
+	style.textContent = "\n[svelte-2736315432].box, [svelte-2736315432] .box {\n  position: relative;\n  overflow: hidden;\n}\n\n[svelte-2736315432].page-container, [svelte-2736315432] .page-container {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: calc(100% + 30px);\n  -webkit-transition: .4s cubic-bezier(0.645, 0.045, 0.355, 1);\n  transition: .4s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n\n[svelte-2736315432].pages, [svelte-2736315432] .pages {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: calc(100% - 30px);\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n}\n\n[svelte-2736315432].pages .page-wrapper, [svelte-2736315432] .pages .page-wrapper {\n  min-width: 100vw;\n  max-width: 100vw;\n  background-color: #fff;\n  box-sizing: border-box;\n  padding: 1em;\n  position: relative;\n  z-index: 1;\n}\n\n[svelte-2736315432].pages .page-wrapper > *, [svelte-2736315432] .pages .page-wrapper > * {\n  position: absolute;\n  z-index: 1;\n}\n\n[svelte-2736315432].progress, [svelte-2736315432] .progress {\n  position: absolute;\n  left: 0;\n  width: 100%;\n  height: 2px;\n  box-sizing: border-box;\n}\n\n[svelte-2736315432].progress.bar, [svelte-2736315432] .progress.bar {\n  -webkit-transition: .4s cubic-bezier(0.55, 0.055, 0.675, 0.19);\n  transition: .4s cubic-bezier(0.55, 0.055, 0.675, 0.19);\n}\n\n[svelte-2736315432].pager, [svelte-2736315432] .pager {\n  position: absolute;\n  right: 50%;\n  -webkit-transform: translateX(50%);\n          transform: translateX(50%);\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  z-index: 1;\n}\n\n[svelte-2736315432].pager:first-of-type, [svelte-2736315432] .pager:first-of-type {\n  z-index: 2;\n}\n\n[svelte-2736315432].pager-links, [svelte-2736315432] .pager-links {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  position: relative;\n  -webkit-transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n  box-sizing: border-box;\n  overflow: hidden;\n}\n\n[svelte-2736315432].pager-link, [svelte-2736315432] .pager-link {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  position: relative;\n  width: .75em;\n  height: .75em;\n  min-width: .75em;\n  min-height: .75em;\n  margin: .5em;\n  cursor: pointer;\n  -webkit-transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n\n[svelte-2736315432].pager-link:not(.prev):not(.next), [svelte-2736315432] .pager-link:not(.prev):not(.next) {\n  background: #222;\n  border-radius: 50%;\n}\n\n[svelte-2736315432].pager-link svg, [svelte-2736315432] .pager-link svg {\n  display: block;\n  fill: #222;\n  width: .5em;\n  -webkit-transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n  transition: .2s cubic-bezier(0.645, 0.045, 0.355, 1);\n}\n";
 	appendNode( style, document.head );
 
 	addedCss = true;
@@ -1694,20 +1694,20 @@ function renderMainFragment ( root, component ) {
 
 function renderIfBlock_0 ( root, component ) {
 	var div = createElement( 'div' );
-	setAttribute( div, 'svelte-2783279863', '' );
+	setAttribute( div, 'svelte-2736315432', '' );
 	component.refs.suwa = div;
 	div.className = "suwa box";
 	div.style.cssText = "\n    width: " + ( root.style.width ) + ";\n    height: " + ( root.style.height ) + ";\n  ";
 	
 	var div1 = createElement( 'div' );
-	setAttribute( div1, 'svelte-2783279863', '' );
+	setAttribute( div1, 'svelte-2736315432', '' );
 	component.refs.container = div1;
 	div1.className = "suwa page-container";
 	
 	appendNode( div1, div );
 	
 	var div2 = createElement( 'div' );
-	setAttribute( div2, 'svelte-2783279863', '' );
+	setAttribute( div2, 'svelte-2736315432', '' );
 	component.refs.pages = div2;
 	div2.className = "suwa pages";
 	div2.style.cssText = "\n        background-color: " + ( root.style.baseColor ) + ";\n      ";
@@ -1789,13 +1789,13 @@ function renderIfBlock_0 ( root, component ) {
 
 function renderIfBlock2_0 ( root, component ) {
 	var div = createElement( 'div' );
-	setAttribute( div, 'svelte-2783279863', '' );
+	setAttribute( div, 'svelte-2736315432', '' );
 	component.refs.pager = div;
 	div.className = "suwa pager";
 	div.style.cssText = "\n        bottom: " + ( root.pager.inset ? '1em' : '-2.3em' ) + ";\n      ";
 	
 	var a = createElement( 'a' );
-	setAttribute( a, 'svelte-2783279863', '' );
+	setAttribute( a, 'svelte-2736315432', '' );
 	setAttribute( a, 'role', "button" );
 	a.className = "suwa pager-link prev";
 	a.style.cssText = "\n          opacity: " + ( !root.pagerLoop && root.activeIdx === 0 ? 0 : 1 ) + ";\n          cursor: " + ( !root.pagerLoop && root.activeIdx === 0 ? 'default' : '' ) + ";\n        ";
@@ -1822,7 +1822,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( createText( "\n          " ), a );
 	
 	var svg = createSvgElement( 'svg' );
-	setAttribute( svg, 'svelte-2783279863', '' );
+	setAttribute( svg, 'svelte-2736315432', '' );
 	setAttribute( svg, 'version', "1.1" );
 	setAttribute( svg, 'viewBox', "0 0 8 16" );
 	setAttribute( svg, 'class', "suwa pager icon" );
@@ -1831,7 +1831,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( svg, a );
 	
 	var path = createSvgElement( 'path' );
-	setAttribute( path, 'svelte-2783279863', '' );
+	setAttribute( path, 'svelte-2736315432', '' );
 	setAttribute( path, 'fill-rule', "evenodd" );
 	setAttribute( path, 'd', "M5.5 3L7 4.5 3.25 8 7 11.5 5.5 13l-5-5z" );
 	
@@ -1839,14 +1839,14 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( createText( "\n        " ), div );
 	
 	var div1 = createElement( 'div' );
-	setAttribute( div1, 'svelte-2783279863', '' );
+	setAttribute( div1, 'svelte-2736315432', '' );
 	component.refs.pagerLinks = div1;
 	div1.className = "pager-links";
 	
 	appendNode( div1, div );
 	
 	var a1 = createElement( 'a' );
-	setAttribute( a1, 'svelte-2783279863', '' );
+	setAttribute( a1, 'svelte-2736315432', '' );
 	setAttribute( a1, 'role', "button" );
 	a1.className = "\n            pager-link\n          ";
 	a1.style.cssText = "\n            background-color: " + ( root.prevPage === root.active ? root.style.accentColor : root.style.subColor ) + ";\n            display: " + ( root.scroll ? 'block' : 'none' ) + ";\n          ";
@@ -1892,7 +1892,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( createText( "\n          " ), div1 );
 	
 	var a2 = createElement( 'a' );
-	setAttribute( a2, 'svelte-2783279863', '' );
+	setAttribute( a2, 'svelte-2736315432', '' );
 	setAttribute( a2, 'role', "button" );
 	a2.className = "\n            pager-link\n          ";
 	a2.style.cssText = "\n            background-color: " + ( root.nextPage === root.active ? root.style.accentColor : root.style.subColor ) + ";\n            display: " + ( root.scroll ? 'block' : 'none' ) + ";\n          ";
@@ -1927,7 +1927,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( createText( "\n        " ), div );
 	
 	var a3 = createElement( 'a' );
-	setAttribute( a3, 'svelte-2783279863', '' );
+	setAttribute( a3, 'svelte-2736315432', '' );
 	setAttribute( a3, 'role', "button" );
 	a3.className = "suwa pager-link next";
 	a3.style.cssText = "\n          opacity: " + ( !root.pagerLoop && root.activeIdx === root.pages.length - 1 ? 0 : 1 ) + ";\n          cursor: " + ( !root.pagerLoop && root.activeIdx === root.pages.length - 1 ? 'default' : '' ) + ";\n        ";
@@ -1953,7 +1953,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( a3, div );
 	
 	var svg1 = createSvgElement( 'svg' );
-	setAttribute( svg1, 'svelte-2783279863', '' );
+	setAttribute( svg1, 'svelte-2736315432', '' );
 	setAttribute( svg1, 'version', "1.1" );
 	setAttribute( svg1, 'viewBox', "0 0 8 16" );
 	setAttribute( svg1, 'class', "suwa pager icon" );
@@ -1962,7 +1962,7 @@ function renderIfBlock2_0 ( root, component ) {
 	appendNode( svg1, a3 );
 	
 	var path1 = createSvgElement( 'path' );
-	setAttribute( path1, 'svelte-2783279863', '' );
+	setAttribute( path1, 'svelte-2736315432', '' );
 	setAttribute( path1, 'fill-rule', "evenodd" );
 	setAttribute( path1, 'd', "M7.5 8l-5 5L1 11.5 4.75 8 1 4.5 2.5 3z" );
 	
@@ -1970,12 +1970,12 @@ function renderIfBlock2_0 ( root, component ) {
 	var text5 = createText( "\n\n      " );
 	
 	var div2 = createElement( 'div' );
-	setAttribute( div2, 'svelte-2783279863', '' );
+	setAttribute( div2, 'svelte-2736315432', '' );
 	div2.className = "suwa pager";
 	div2.style.cssText = "\n        bottom: " + ( root.pager.inset ? '1em' : '-2.3em' ) + ";\n        display: " + ( root.pagerUpdating ? '' : 'none' ) + ";\n      ";
 	
 	var div3 = createElement( 'div' );
-	setAttribute( div3, 'svelte-2783279863', '' );
+	setAttribute( div3, 'svelte-2736315432', '' );
 	div3.className = "pager-links";
 	
 	appendNode( div3, div2 );
@@ -2078,10 +2078,10 @@ function renderIfBlock2_0 ( root, component ) {
 
 function renderEachBlock1 ( root, eachBlock1_value, page, x, component ) {
 	var a = createElement( 'a' );
-	setAttribute( a, 'svelte-2783279863', '' );
+	setAttribute( a, 'svelte-2736315432', '' );
 	setAttribute( a, 'role', "button" );
 	a.className = "\n              pager-link button\n            ";
-	a.style.cssText = "\n              background-color: " + ( (!root.scroll && root.active === page) || (root.scroll && root.active === page) ? root.style.accentColor : root.style.subColor ) + ";\n              transition: none;\n            ";
+	a.style.cssText = "\n              background-color: " + ( (!root.scroll && root.active === page) || (root.scroll && root.active === page) ? root.style.accentColor : root.style.subColor ) + ";\n              -webkit-transition: none;\n              transition: none;\n            ";
 	
 	function clickHandler ( event ) {
 		var eachBlock1_value = this.__svelte.eachBlock1_value, x = this.__svelte.x, page = eachBlock1_value[x];
@@ -2118,7 +2118,7 @@ function renderEachBlock1 ( root, eachBlock1_value, page, x, component ) {
 		update: function ( changed, root, eachBlock1_value, page, x ) {
 			var __tmp;
 		
-			a.style.cssText = "\n              background-color: " + ( (!root.scroll && root.active === page) || (root.scroll && root.active === page) ? root.style.accentColor : root.style.subColor ) + ";\n              transition: none;\n            ";
+			a.style.cssText = "\n              background-color: " + ( (!root.scroll && root.active === page) || (root.scroll && root.active === page) ? root.style.accentColor : root.style.subColor ) + ";\n              -webkit-transition: none;\n              transition: none;\n            ";
 			
 			a.__svelte.eachBlock1_value = eachBlock1_value;
 			a.__svelte.x = x;
@@ -2138,10 +2138,10 @@ function renderEachBlock1 ( root, eachBlock1_value, page, x, component ) {
 
 function renderEachBlock ( root, eachBlock_value, page, x, component ) {
 	var a = createElement( 'a' );
-	setAttribute( a, 'svelte-2783279863', '' );
+	setAttribute( a, 'svelte-2736315432', '' );
 	setAttribute( a, 'role', "button" );
 	a.className = "\n              pager-link button\n            ";
-	a.style.cssText = "\n              background-color: " + ( (!root.scroll && root.active === page) || (root.scroll && root.active === page) ? root.style.accentColor : root.style.subColor ) + ";\n              transition: " + ( root.active === page ? 'none' : '' ) + ";\n            ";
+	a.style.cssText = "\n              background-color: " + ( (!root.scroll && root.active === page) || (root.scroll && root.active === page) ? root.style.accentColor : root.style.subColor ) + ";\n              -webkit-transition: " + ( root.active === page ? 'none' : '' ) + ";\n              transition: " + ( root.active === page ? 'none' : '' ) + ";\n            ";
 	
 	function clickHandler ( event ) {
 		var eachBlock_value = this.__svelte.eachBlock_value, x = this.__svelte.x, page = eachBlock_value[x];
@@ -2178,7 +2178,7 @@ function renderEachBlock ( root, eachBlock_value, page, x, component ) {
 		update: function ( changed, root, eachBlock_value, page, x ) {
 			var __tmp;
 		
-			a.style.cssText = "\n              background-color: " + ( (!root.scroll && root.active === page) || (root.scroll && root.active === page) ? root.style.accentColor : root.style.subColor ) + ";\n              transition: " + ( root.active === page ? 'none' : '' ) + ";\n            ";
+			a.style.cssText = "\n              background-color: " + ( (!root.scroll && root.active === page) || (root.scroll && root.active === page) ? root.style.accentColor : root.style.subColor ) + ";\n              -webkit-transition: " + ( root.active === page ? 'none' : '' ) + ";\n              transition: " + ( root.active === page ? 'none' : '' ) + ";\n            ";
 			
 			a.__svelte.eachBlock_value = eachBlock_value;
 			a.__svelte.x = x;
@@ -2198,11 +2198,11 @@ function renderEachBlock ( root, eachBlock_value, page, x, component ) {
 
 function renderIfBlock1_0 ( root, component ) {
 	var div = createElement( 'div' );
-	setAttribute( div, 'svelte-2783279863', '' );
+	setAttribute( div, 'svelte-2736315432', '' );
 	div.className = "suwa progress";
 	
 	var div1 = createElement( 'div' );
-	setAttribute( div1, 'svelte-2783279863', '' );
+	setAttribute( div1, 'svelte-2736315432', '' );
 	div1.className = "suwa progress bar";
 	div1.style.cssText = "\n          background-color: " + ( root.style.accentColor ) + ";\n          width: " + ( root.activeNth / (root.pages.length - 1) * 100 ) + "%;\n        ";
 	
